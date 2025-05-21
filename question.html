@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>السؤال</title>
+  <style>
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background-color: #f0f8ff;
+      padding: 20px;
+      text-align: center;
+    }
+    .question-box {
+      background-color: #fff;
+      border: 2px solid #ff5500;
+      border-radius: 12px;
+      padding: 30px;
+      width: 80%;
+      margin: 40px auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .question-box h2 {
+      color: #ff5500;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #ff5500;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .answer {
+      margin-top: 20px;
+      font-size: 20px;
+      color: green;
+      font-weight: bold;
+    }
+    #timer {
+      font-size: 18px;
+      color: #0077b6;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="question-box">
+    <h2 id="category-title">تحميل السؤال...</h2>
+    <p id="question-text">...</p>
+    <button class="btn" onclick="showAnswer()">إظهار الإجابة</button>
+    <div class="answer" id="answer-text" style="display:none;"></div>
+    <div id="answer-options" style="display:none;">
+      <p>من جاوب صح؟</p>
+      <button class="btn" id="team1-button" onclick="awardPoints('team1')"></button>
+      <button class="btn" id="team2-button" onclick="awardPoints('team2')"></button>
+    </div>
+    <div id="timer">الوقت المتبقي: <span id="countdown">60</span> ثانية</div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script>
+    const category = localStorage.getItem("currentQuestionCategory");
+    const value = parseInt(localStorage.getItem("currentQuestionValue"));
+    const questionElement = document.getElementById("question-text");
+    const answerElement = document.getElementById("answer-text");
+    const titleElement = document.getElementById("category-title");
+
+    titleElement.textContent = `الفئة: ${category} | النقاط: ${value}`;
+
+    if (!questions[category] || !questions[category][value]) {
+      questionElement.textContent = "⚠️ عذرًا، لا يوجد سؤال لهذه الفئة أو النقاط.";
+    } else {
+      questionElement.textContent = questions[category][value].question;
+      answerElement.textContent = questions[category][value].answer;
+    }
+
+    function showAnswer() {
+      answerElement.style.display = "block";
+      document.getElementById("answer-options").style.display = "block";
+    }
+
+    function awardPoints(team) {
+      let points = parseInt(localStorage.getItem(team + "_points") || "0");
+      points += value;
+      localStorage.setItem(team + "_points", points);
+
+      // فحص الفائز
+      if (points >= 2000) {
+        localStorage.setItem("winner", team);
+      }
+
+      window.location.href = "game.html";
+    }
+
+    
+    const team1Name = localStorage.getItem("team1") || "الفريق الأول";
+    const team2Name = localStorage.getItem("team2") || "الفريق الثاني";
+    document.getElementById("team1-button").innerText = "✅ " + team1Name;
+    document.getElementById("team2-button").innerText = "✅ " + team2Name;
+
+    let countdown = 60;
+    
+    const timerDisplay = document.getElementById("countdown");
+    const timerInterval = setInterval(() => {
+      countdown--;
+      timerDisplay.textContent = countdown;
+      if (countdown <= 0) {
+        clearInterval(timerInterval);
+        showAnswer();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
